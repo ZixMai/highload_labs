@@ -4,3 +4,4 @@
 - Оттуда же DDL: [sql/0002_ddl.sql](sql/0002_ddl.sql)
 - Заполнил БДшку и добавил функцию для учёта источника данных, чтобы хоть как-то различать то, что в моке: [sql/0001_pull_files.sql](sql/0001_pull_files.sql)
 - DML: [sql/0003_dml.sql](sql/0003_dml.sql)
+- Валидация работы: [validation.ipynb](validation.ipynb)
