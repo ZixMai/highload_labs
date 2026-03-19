@@ -1,0 +1,93 @@
+Table dim_store {
+  id "bigint generated always as identity" [pk]
+  store_name varchar(255)
+  store_location varchar(255)
+  store_city varchar(100)
+  store_state varchar(100)
+  store_country varchar(255)
+  store_phone varchar(50)
+  store_email varchar(255)
+}
+
+Table dim_supplier {
+  id "bigint generated always as identity" [pk]
+  supplier_name varchar(255)
+  supplier_contact varchar(255)
+  supplier_email varchar(255)
+  supplier_phone varchar(50)
+  supplier_address text
+  supplier_city varchar(100)
+  supplier_country varchar(255)
+}
+
+Table dim_seller {
+  id "bigint generated always as identity" [pk]
+  seller_first_name varchar(255)
+  seller_last_name varchar(255)
+  seller_email varchar(255)
+  seller_country varchar(255)
+  seller_postal_code varchar(50)
+}
+
+Table dim_customer {
+  id "bigint generated always as identity" [pk]
+  customer_first_name varchar(255)
+  customer_last_name varchar(255)
+  customer_age int
+  customer_email varchar(255)
+  customer_country varchar(255)
+  customer_postal_code varchar(50)
+  customer_pet_id bigint
+}
+
+Table dim_product {
+  id "bigint generated always as identity" [pk]
+  product_name varchar(255)
+  product_category varchar(100)
+  product_price numeric(10,2)
+  product_quantity int
+  product_weight numeric(8,2)
+  product_color varchar(100)
+  product_size varchar(50)
+  product_brand varchar(100)
+  product_material varchar(100)
+  product_description text
+  product_rating numeric(3,2)
+  product_reviews int
+  product_release_date varchar(50)
+  product_expiry_date varchar(50)
+}
+
+Table dim_pet {
+  id "bigint generated always as identity" [pk]
+  pet_type varchar(100)
+  pet_name varchar(100)
+  pet_breed varchar(100)
+}
+
+Table dim_category {
+  id "bigint generated always as identity" [pk]
+  category varchar(100)
+}
+
+Table fact_sale {
+  id "bigint generated always as identity" [pk]
+  sale_date varchar(50)
+  sale_customer_id bigint
+  sale_seller_id bigint
+  sale_product_id bigint
+  sale_quantity int
+  sale_total_price numeric(12,2)
+  sale_supplier_id bigint
+  sale_store_id bigint
+  sale_category_id bigint
+}
+
+
+Ref: dim_product.id < fact_sale.sale_product_id
+Ref: dim_seller.id < fact_sale.sale_seller_id
+Ref: dim_customer.id < fact_sale.sale_customer_id
+Ref: dim_store.id < fact_sale.sale_store_id
+Ref: dim_supplier.id < fact_sale.sale_supplier_id
+Ref: dim_category.id < fact_sale.sale_category_id
+Ref: dim_pet.id < dim_customer.customer_pet_id

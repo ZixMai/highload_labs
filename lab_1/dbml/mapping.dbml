@@ -1,0 +1,194 @@
+Table mock_data {
+  id biginteger
+  customer_first_name varchar(255)
+  customer_last_name varchar(255)
+  customer_age integer
+  customer_email varchar(255)
+  customer_country varchar(255)
+  customer_postal_code varchar(50)
+  customer_pet_type varchar(100)
+  customer_pet_name varchar(100)
+  customer_pet_breed varchar(100)
+  seller_first_name varchar(255)
+  seller_last_name varchar(255)
+  seller_email varchar(255)
+  seller_country varchar(255)
+  seller_postal_code varchar(50)
+  product_name varchar(255)
+  product_category varchar(100)
+  product_price numeric(10,2)
+  product_quantity integer
+  product_weight numeric(8,2)
+  product_color varchar(100)
+  product_size varchar(50)
+  product_brand varchar(100)
+  product_material varchar(100)
+  product_description text
+  product_rating numeric(3,2)
+  product_reviews integer
+  product_release_date varchar(50)
+  product_expiry_date varchar(50)
+  store_name varchar(255)
+  store_location varchar(255)
+  store_city varchar(100)
+  store_state varchar(100)
+  store_country varchar(255)
+  store_phone varchar(50)
+  store_email varchar(255)
+  supplier_name varchar(255)
+  supplier_contact varchar(255)
+  supplier_email varchar(255)
+  supplier_phone varchar(50)
+  supplier_address text
+  supplier_city varchar(100)
+  supplier_country varchar(255)
+  sale_date varchar(50)
+  sale_customer_id biginteger
+  sale_seller_id biginteger
+  sale_product_id biginteger
+  sale_quantity integer
+  sale_total_price numeric(12,2)
+  pet_category varchar(100)
+}
+
+Table dim_store {
+  id bigint [pk]
+  store_name varchar(255)
+  store_location varchar(255)
+  store_city varchar(100)
+  store_state varchar(100)
+  store_country varchar(255)
+  store_phone varchar(50)
+  store_email varchar(255)
+}
+
+Table dim_supplier {
+  id bigint [pk]
+  supplier_name varchar(255)
+  supplier_contact varchar(255)
+  supplier_email varchar(255)
+  supplier_phone varchar(50)
+  supplier_address text
+  supplier_city varchar(100)
+  supplier_country varchar(255)
+}
+
+Table dim_seller {
+  id bigint [pk]
+  seller_first_name varchar(255)
+  seller_last_name varchar(255)
+  seller_email varchar(255)
+  seller_country varchar(255)
+  seller_postal_code varchar(50)
+}
+
+Table dim_customer {
+  id bigint [pk]
+  customer_first_name varchar(255)
+  customer_last_name varchar(255)
+  customer_age int
+  customer_email varchar(255)
+  customer_country varchar(255)
+  customer_postal_code varchar(50)
+  customer_pet_id bigint
+}
+
+Table dim_product {
+  id bigint [pk]
+  product_name varchar(255)
+  product_category varchar(100)
+  product_price numeric(10,2)
+  product_quantity int
+  product_weight numeric(8,2)
+  product_color varchar(100)
+  product_size varchar(50)
+  product_brand varchar(100)
+  product_material varchar(100)
+  product_description text
+  product_rating numeric(3,2)
+  product_reviews int
+  product_release_date varchar(50)
+  product_expiry_date varchar(50)
+}
+
+Table dim_pet {
+  id bigint [pk]
+  pet_type varchar(100)
+  pet_name varchar(100)
+  pet_breed varchar(100)
+}
+
+Table dim_category {
+  id bigint [pk]
+  category varchar(100)
+}
+
+Table fact_sale {
+  id bigint [pk]
+  sale_date varchar(50)
+  sale_customer_id bigint
+  sale_seller_id bigint
+  sale_product_id bigint
+  sale_quantity int
+  sale_total_price numeric(12,2)
+  sale_supplier_id bigint
+  sale_store_id bigint
+  sale_category_id bigint
+}
+
+Ref: mock_data.store_name - dim_store.store_name
+Ref: mock_data.store_location - dim_store.store_location
+Ref: mock_data.store_city - dim_store.store_city
+Ref: mock_data.store_state - dim_store.store_state
+Ref: mock_data.store_country - dim_store.store_country
+Ref: mock_data.store_phone - dim_store.store_phone
+Ref: mock_data.store_email - dim_store.store_email
+
+Ref: mock_data.supplier_name - dim_supplier.supplier_name
+Ref: mock_data.supplier_contact - dim_supplier.supplier_contact
+Ref: mock_data.supplier_email - dim_supplier.supplier_email
+Ref: mock_data.supplier_phone - dim_supplier.supplier_phone
+Ref: mock_data.supplier_address - dim_supplier.supplier_address
+Ref: mock_data.supplier_city - dim_supplier.supplier_city
+Ref: mock_data.supplier_country - dim_supplier.supplier_country
+
+Ref: mock_data.seller_first_name - dim_seller.seller_first_name
+Ref: mock_data.seller_last_name - dim_seller.seller_last_name
+Ref: mock_data.seller_email - dim_seller.seller_email
+Ref: mock_data.seller_country - dim_seller.seller_country
+Ref: mock_data.seller_postal_code - dim_seller.seller_postal_code
+
+Ref: mock_data.customer_first_name - dim_customer.customer_first_name
+Ref: mock_data.customer_last_name - dim_customer.customer_last_name
+Ref: mock_data.customer_age - dim_customer.customer_age
+Ref: mock_data.customer_email - dim_customer.customer_email
+Ref: mock_data.customer_country - dim_customer.customer_country
+Ref: mock_data.customer_postal_code - dim_customer.customer_postal_code
+
+Ref: mock_data.customer_pet_type - dim_pet.pet_type
+Ref: mock_data.customer_pet_name - dim_pet.pet_name
+Ref: mock_data.customer_pet_breed - dim_pet.pet_breed
+
+Ref: mock_data.pet_category - dim_category.category
+
+Ref: mock_data.product_name - dim_product.product_name
+Ref: mock_data.product_category - dim_product.product_category
+Ref: mock_data.product_price - dim_product.product_price
+Ref: mock_data.product_quantity - dim_product.product_quantity
+Ref: mock_data.product_weight - dim_product.product_weight
+Ref: mock_data.product_color - dim_product.product_color
+Ref: mock_data.product_size - dim_product.product_size
+Ref: mock_data.product_brand - dim_product.product_brand
+Ref: mock_data.product_material - dim_product.product_material
+Ref: mock_data.product_description - dim_product.product_description
+Ref: mock_data.product_rating - dim_product.product_rating
+Ref: mock_data.product_reviews - dim_product.product_reviews
+Ref: mock_data.product_release_date - dim_product.product_release_date
+Ref: mock_data.product_expiry_date - dim_product.product_expiry_date
+
+Ref: mock_data.sale_date - fact_sale.sale_date
+Ref: mock_data.sale_customer_id - fact_sale.sale_customer_id
+Ref: mock_data.sale_seller_id - fact_sale.sale_seller_id
+Ref: mock_data.sale_product_id - fact_sale.sale_product_id
+Ref: mock_data.sale_quantity - fact_sale.sale_quantity
+Ref: mock_data.sale_total_price - fact_sale.sale_total_price
