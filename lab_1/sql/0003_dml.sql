@@ -151,3 +151,13 @@ LEFT JOIN LATERAL (
     ORDER BY sup.id
     LIMIT 1
 ) sup ON TRUE;
+
+-- Для соответствия запросу лабы:
+DROP TABLE load_batches CASCADE;
+ALTER TABLE "dim_store"    DROP COLUMN "batch_id";
+ALTER TABLE "dim_supplier" DROP COLUMN "batch_id";
+ALTER TABLE "dim_seller"   DROP COLUMN "batch_id";
+ALTER TABLE "dim_customer" DROP COLUMN "batch_id";
+ALTER TABLE "dim_product"  DROP COLUMN "batch_id";
+ALTER TABLE "dim_pet"      DROP COLUMN "batch_id";
+ALTER TABLE "dim_category" DROP COLUMN "batch_id";
