@@ -88,12 +88,12 @@ public static class SnowflakeMapper
                 mockData["product_reviews"].Alias("product_reviews"),
                 When(
                         mockData["product_release_date"].RLike("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$"),
-                        ToDate(mockData["product_release_date"], "MM/dd/yyyy"))
+                        ToDate(mockData["product_release_date"], "M/d/yyyy"))
                     .Otherwise(Lit(null))
                     .Alias("product_release_date"),
                 When(
                         mockData["product_expiry_date"].RLike("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$"),
-                        ToDate(mockData["product_expiry_date"], "MM/dd/yyyy"))
+                        ToDate(mockData["product_expiry_date"], "M/d/yyyy"))
                     .Otherwise(Lit(null))
                     .Alias("product_expiry_date"),
                 mockData["source_file"].Alias("source_file"),
@@ -250,6 +250,6 @@ public static class SnowflakeMapper
 
         await PostgresSchema.CreatePrimaryKeys(null, "fact_sale");
 
-        await PostgresSchema.CreateForeignKeys(null, "fact_sale");
+        await PostgresSchema.CreateForeignKeys();
     }
 }
