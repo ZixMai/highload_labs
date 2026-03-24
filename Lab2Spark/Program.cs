@@ -8,3 +8,4 @@ var spark = SparkSession
     .GetOrCreate();
 
 await spark.TransformToSnowflake();
+spark.WriteReportsToClickhouse();
