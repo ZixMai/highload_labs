@@ -1,0 +1,106 @@
+﻿name: highload-lab2
+
+services:
+  lab2spark-build:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - lab2spark-publish:/app/publish
+    command: >
+      bash -c "dotnet publish Lab2Spark.csproj -c Release -o /app/publish"
+  
+  spark-dotnet:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    user: root
+    container_name: highload-lab2-spark
+    depends_on:
+      lab2spark-build:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    networks:
+      - highload-lab2-network
+    environment:
+      DOTNET_WORKER_DIR: /worker
+      DOTNET_ASSEMBLY_SEARCH_PATHS: /app/publish
+    volumes:
+      - lab2spark-publish:/app/publish
+      - ./jars:/jars:ro
+      - ./worker:/worker
+    command: >
+      chmod +x /worker/Microsoft.Spark.Worker;
+      /opt/spark/bin/spark-submit
+      --class org.apache.spark.deploy.dotnet.DotnetRunner
+      --master local
+      --packages org.postgresql:postgresql:42.6.0,com.clickhouse:clickhouse-jdbc:0.4.6
+      /jars/microsoft-spark-3-4_2.12-2.3.1.jar
+      dotnet /app/publish/Lab2Spark.dll
+  
+  clickhouse:
+    platform: linux/amd64
+    image: clickhouse/clickhouse-server:25.12-alpine
+    container_name: highload-lab2-clickhouse-server
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./users.xml:/etc/clickhouse-server/users.d/users.xml:ro
+      - ./disable_logs.xml:/etc/clickhouse-server/config.d/z_disable_logs.xml:ro
+      - ./config.xml:/etc/clickhouse-server/config.d/config.xml:ro
+    environment:
+      CLICKHOUSE_DB: lab2
+      ADMIN_PASSWORD: xekg_eh9xyJqy_xa?rd!en66
+    healthcheck:
+      test: [ "CMD-SHELL", "clickhouse-client --query 'SELECT 1'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - highload-lab2-network
+
+  postgres:
+    platform: linux/amd64
+    container_name: highload-lab2-postgres
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: "/var/lib/postgresql/18/docker"
+      PGUSER: postgres
+      PGDATABASE: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./sql:/docker-entrypoint-initdb.d
+      - ./LabRepo/BigDataSpark/исходные данные:/mock_data:ro
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
+    networks:
+      - highload-lab2-network
+
+volumes:
+  postgres-data:
+  clickhouse_data:
+  lab2spark-publish:
+
+networks:
+  highload-lab2-network:
+    driver: bridge
+

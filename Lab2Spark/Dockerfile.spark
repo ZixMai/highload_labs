@@ -1,0 +1,8 @@
+FROM mcr.microsoft.com/dotnet/runtime:8.0 AS dotnet_runtime
+
+FROM apache/spark:3.4.1
+
+COPY --from=dotnet_runtime /usr/share/dotnet /usr/share/dotnet
+
+ENV DOTNET_ROOT=/usr/share/dotnet
+ENV PATH="${PATH}:/usr/share/dotnet"
