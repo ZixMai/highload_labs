@@ -21,13 +21,15 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
     networks:
       - highload-lab3-network
 
   kafka:
-    image: apache/kafka:3.7.0
-    container_name: kafka
+    image: apache/kafka:3.9.1
+    container_name: highload-lab3-kafka
+    restart: unless-stopped
     ports:
       - "9092:9092"
       - "9093:9093"
@@ -35,7 +37,7 @@ services:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
@@ -49,21 +51,76 @@ services:
     networks:
       - highload-lab3-network
 
-  app:
-    container_name: highload-lab3-app
+  jobmanager:
+    container_name: highload-lab3-flink-jobmanager
+    restart: unless-stopped
     build:
       context: .
-      dockerfile: src/main/docker/Dockerfile
-    restart: unless-stopped
-    volumes:
-      - ./lab_task_repo/BDSnowflake/исходные данные:/mock_data:ro
+      dockerfile: flink-job/src/main/docker/Dockerfile
+    ports:
+      - "8081:8081"
+    command: standalone-job --job-classname ru.highload_labs.FlinkJob
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=csv-data
+      - KAFKA_CONSUMER_GROUP=flink-job-group
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        parallelism.default: 1
     depends_on:
-      postgres:
-        condition: service_healthy
       kafka:
+        condition: service_started
+      kafka-producer:
+        condition: service_completed_successfully
+    networks:
+      - highload-lab3-network
+
+  taskmanager:
+    container_name: highload-lab3-flink-taskmanager
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: flink-job/src/main/docker/Dockerfile
+    command: taskmanager
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=csv-data
+      - KAFKA_CONSUMER_GROUP=flink-job-group
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 4
+        taskmanager.memory.process.size: 1728m
+    depends_on:
+      jobmanager:
         condition: service_started
     networks:
       - highload-lab3-network
+
+  kafka-producer:
+    container_name: highload-lab3-kafka-producer
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: kafka-producer/src/main/docker/Dockerfile
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: csv-data
+      CSV_PATH: /app/csv-data
+    volumes:
+      - ./lab_task_repo/BigDataFlink/исходные данные:/app/csv-data:ro
+    networks:
+      - highload-lab3-network
+    depends_on:
+      kafka:
+        condition: service_started
 
 volumes:
   postgres-data:
