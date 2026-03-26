@@ -1,5 +1,7 @@
 package ru.highload_labs.config;
 
+import java.io.Serializable;
+
 public record HibernateConfig(
         String driverClass,
         String hbm2ddlAuto,
@@ -8,6 +10,6 @@ public record HibernateConfig(
         boolean formatSql,
         String currentSessionContextClass,
         String physicalNamingStrategy
-) {
+) implements Serializable {
 }
 

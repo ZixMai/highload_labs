@@ -2,13 +2,14 @@ package ru.highload_labs.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Properties;
 
 public record AppConfig(
         DbConfig dbConfig,
         HibernateConfig hibernateConfig,
         int sinkBatchSize
-) {
+) implements Serializable {
     public static AppConfig fromPropertiesFile(String resourceName) {
         Properties properties = new Properties();
 
@@ -34,7 +35,7 @@ public record AppConfig(
                 Boolean.parseBoolean(properties.getProperty("app.hibernate.show-sql", "false")),
                 Boolean.parseBoolean(properties.getProperty("app.hibernate.format-sql", "false")),
                 properties.getProperty("app.hibernate.current-session-context-class", "thread"),
-                properties.getProperty("app.hibernate.physical-naming-strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl")
+                properties.getProperty("app.hibernate.physical-naming-strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy")
         );
 
         int sinkBatchSize = Integer.parseInt(properties.getProperty("app.sink.batch-size", "100"));

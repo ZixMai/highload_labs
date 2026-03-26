@@ -53,7 +53,7 @@ services:
 
   jobmanager:
     container_name: highload-lab3-flink-jobmanager
-    restart: unless-stopped
+    restart: no
     build:
       context: .
       dockerfile: flink-job/src/main/docker/Dockerfile

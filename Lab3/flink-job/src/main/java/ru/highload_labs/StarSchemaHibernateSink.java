@@ -105,7 +105,7 @@ public class StarSchemaHibernateSink implements Sink<RawSaleEvent> {
         }
 
         @Override
-        public void close() {
+        public void close() throws Exception {
             try {
                 if (transaction != null && transaction.isActive()) {
                     transaction.commit();

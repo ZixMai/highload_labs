@@ -30,9 +30,6 @@ public class DimCategory implements Serializable {
 
     @Column(name = "source_file")
     private String sourceFile;
-
-    @Column(name = "source_id")
-    private Long sourceId;
 }
 
 
