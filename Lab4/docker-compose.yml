@@ -43,19 +43,21 @@ services:
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml:ro
       - ./disable_logs.xml:/etc/clickhouse-server/config.d/z_disable_logs.xml:ro
       - ./config.xml:/etc/clickhouse-server/config.d/config.xml:ro
-      - ./clickhouse-init.sql:/init/clickhouse-init.sql:ro
-      - ./clickhouse-entrypoint.sh:/clickhouse-entrypoint.sh:ro
+      - ./clickhouse-init.sql:/docker-entrypoint-initdb.d/01-clickhouse-init.sql:ro
       - ./исходные данные:/mock_data
     environment:
       CLICKHOUSE_DB: lab4
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: xekg_eh9xyJDJFHJKSDHKqy_xa?rd!en66
+      CLICKHOUSE_SKIP_USER_SETUP: "1"
+      CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS: "1"
       ADMIN_PASSWORD: xekg_eh9xyJDJFHJKSDHKqy_xa?rd!en66
-    entrypoint: ["/bin/sh", "/clickhouse-entrypoint.sh"]
     healthcheck:
-      test: [ "CMD-SHELL", "clickhouse-client --query 'SELECT 1'" ]
+      test: [ "CMD-SHELL", "clickhouse-client --host 127.0.0.1 --user admin --password \"$${ADMIN_PASSWORD}\" --query 'SELECT 1'" ]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 15s
+      retries: 12
+      start_period: 60s
     networks:
       - highload-lab4-network
 
