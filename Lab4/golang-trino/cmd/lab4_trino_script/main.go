@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"golang-trino/internal/app"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
