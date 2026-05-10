@@ -1,6 +1,7 @@
 FROM rocker/r-ver:4.4.1
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get -o Acquire::Retries=5 -o Acquire::Max-FutureTime=600 update && \
+    apt-get install -y --no-install-recommends \
     ca-certificates \
     libssl-dev \
     libcurl4-openssl-dev \
