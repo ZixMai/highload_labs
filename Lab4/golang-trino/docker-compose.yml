@@ -1,12 +1,11 @@
-﻿name: highload-lab4-golang-trino
-
-services:
+﻿services:
   golang-trino:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: highload-lab4-golang-trino
-    restart: no
+    hostname: golang-trino
+    restart: on-failure
     environment:
       TRINO_SCHEME: http
       TRINO_HOST: trino
@@ -20,3 +19,7 @@ services:
         condition: service_healthy
     networks:
       - highload-lab4-network
+
+networks:
+  highload-lab4-network:
+    driver: bridge

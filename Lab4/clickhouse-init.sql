@@ -1,6 +1,8 @@
-DROP TABLE IF EXISTS mock_data;
+CREATE DATABASE IF NOT EXISTS lab4;
 
-CREATE TABLE mock_data
+DROP TABLE IF EXISTS lab4.mock_data;
+
+CREATE TABLE lab4.mock_data
 (
     id                   Int32,
     customer_first_name  String,
@@ -58,7 +60,7 @@ ENGINE = MergeTree()
 ORDER BY id;
 
 
-INSERT INTO mock_data
+INSERT INTO lab4.mock_data
 SELECT
     id, customer_first_name, customer_last_name, customer_age, customer_email,
     customer_country, customer_postal_code, customer_pet_type, customer_pet_name,
@@ -74,7 +76,7 @@ SELECT
     '/mock_data/MOCK_DATA (5).csv' AS source_file
 FROM file('/mock_data/MOCK_DATA (5).csv', CSVWithNames);
 
-INSERT INTO mock_data
+INSERT INTO lab4.mock_data
 SELECT
     id, customer_first_name, customer_last_name, customer_age, customer_email,
     customer_country, customer_postal_code, customer_pet_type, customer_pet_name,
@@ -90,7 +92,7 @@ SELECT
     '/mock_data/MOCK_DATA (6).csv' AS source_file
 FROM file('/mock_data/MOCK_DATA (6).csv', CSVWithNames);
 
-INSERT INTO mock_data
+INSERT INTO lab4.mock_data
 SELECT
     id, customer_first_name, customer_last_name, customer_age, customer_email,
     customer_country, customer_postal_code, customer_pet_type, customer_pet_name,
@@ -106,7 +108,7 @@ SELECT
     '/mock_data/MOCK_DATA (7).csv' AS source_file
 FROM file('/mock_data/MOCK_DATA (7).csv', CSVWithNames);
 
-INSERT INTO mock_data
+INSERT INTO lab4.mock_data
 SELECT
     id, customer_first_name, customer_last_name, customer_age, customer_email,
     customer_country, customer_postal_code, customer_pet_type, customer_pet_name,
@@ -122,7 +124,7 @@ SELECT
     '/mock_data/MOCK_DATA (8).csv' AS source_file
 FROM file('/mock_data/MOCK_DATA (8).csv', CSVWithNames);
 
-INSERT INTO mock_data
+INSERT INTO lab4.mock_data
 SELECT
     id, customer_first_name, customer_last_name, customer_age, customer_email,
     customer_country, customer_postal_code, customer_pet_type, customer_pet_name,
@@ -140,11 +142,7 @@ FROM file('/mock_data/MOCK_DATA (9).csv', CSVWithNames);
 
 
 SELECT 'rows: ' || toString(COUNT(*)) AS status
-FROM mock_data;
-
-
-
-CREATE DATABASE IF NOT EXISTS lab4;
+FROM lab4.mock_data;
 
 DROP TABLE IF EXISTS lab4.dim_store;
 CREATE TABLE lab4.dim_store

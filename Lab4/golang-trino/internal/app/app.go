@@ -9,9 +9,8 @@ import (
 	"os"
 )
 
-func Run(ctx context.Context, cancel context.CancelFunc) {
+func Run(ctx context.Context) error {
 	internalCtx := context.WithoutCancel(ctx)
-	defer cancel()
 
 	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
@@ -20,14 +19,12 @@ func Run(ctx context.Context, cancel context.CancelFunc) {
 
 	cfg, err := trino_connector.ConfigFromEnv()
 	if err != nil {
-		slog.ErrorContext(internalCtx, fmt.Sprintf("Failed to load Trino config: %s", err))
-		return
+		return fmt.Errorf("load trino config: %w", err)
 	}
 
 	trinoClient, err := trino_connector.GetTrinoClient(cfg)
 	if err != nil {
-		slog.ErrorContext(internalCtx, fmt.Sprintf("Failed to connect Trino: %s", err))
-		return
+		return fmt.Errorf("connect trino: %w", err)
 	}
 	defer func() {
 		if err := trinoClient.Close(); err != nil {
@@ -36,8 +33,10 @@ func Run(ctx context.Context, cancel context.CancelFunc) {
 	}()
 
 	if err := loadStarFromRaw(internalCtx, trinoClient); err != nil {
-		slog.ErrorContext(internalCtx, fmt.Sprintf("Failed to load star schema: %s", err))
+		return fmt.Errorf("load star schema: %w", err)
 	}
+
+	return nil
 }
 
 func loadStarFromRaw(ctx context.Context, db *sql.DB) error {
@@ -149,9 +148,9 @@ WITH raw AS (
         supplier_city,
         supplier_country,
         source_file
-    FROM clickhouse.default.mock_data
-)
-`
+	    FROM clickhouse.lab4.mock_data
+	)
+	`
 
 	statements := []string{
 		`INSERT INTO clickhouse.lab4.dim_pet (id, pet_type, pet_name, pet_breed, source_file)

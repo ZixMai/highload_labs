@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/trinodb/trino-go-client/trino"
 	_ "github.com/trinodb/trino-go-client/trino"
@@ -17,6 +18,7 @@ const (
 	defaultTrinoUser     = "trino"
 	defaultTrinoPassword = "trino"
 	defaultTrinoCatalog  = "postgres"
+	defaultTrinoWaitSec  = 90
 	defaultTrinoSchema   = "public"
 	defaultTrinoScheme   = "http"
 )
@@ -36,7 +38,11 @@ func ConfigFromEnv() (trino.Config, error) {
 	serverURL := url.URL{
 		Scheme: scheme,
 		Host:   fmt.Sprintf("%s:%d", host, port),
-		User:   url.UserPassword(user, password),
+	}
+	if password != "" {
+		serverURL.User = url.UserPassword(user, password)
+	} else {
+		serverURL.User = url.User(user)
 	}
 
 	return trino.Config{
@@ -56,13 +62,33 @@ func GetTrinoClient(cfg trino.Config) (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open trino connection: %w", err)
 	}
-
-	if err := db.Ping(); err != nil {
+	if err := waitForTrino(db); err != nil {
 		_ = db.Close()
-		return nil, fmt.Errorf("ping trino: %w", err)
+		return nil, err
 	}
 
 	return db, nil
+}
+
+func waitForTrino(db *sql.DB) error {
+	deadline := time.Now().Add(time.Duration(getEnvIntOr(defaultTrinoWaitSec, "TRINO_WAIT_SECONDS")) * time.Second)
+	var lastErr error
+	for time.Now().Before(deadline) {
+		if err := db.Ping(); err != nil {
+			lastErr = err
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		var one int
+		if err := db.QueryRow("SELECT 1").Scan(&one); err == nil {
+			return nil
+		} else {
+			lastErr = err
+		}
+		time.Sleep(2 * time.Second)
+	}
+	return fmt.Errorf("ping trino: %w", lastErr)
 }
 
 func getEnv(key, fallback string) string {
@@ -81,4 +107,12 @@ func getEnvInt(key string, fallback int) (int, error) {
 		return parsed, nil
 	}
 	return fallback, nil
+}
+
+func getEnvIntOr(fallback int, key string) int {
+	value, err := getEnvInt(key, fallback)
+	if err != nil {
+		return fallback
+	}
+	return value
 }

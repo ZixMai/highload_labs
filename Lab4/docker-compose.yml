@@ -8,6 +8,7 @@ services:
   trino:
     image: trinodb/trino:480
     container_name: highload-lab4-trino
+    hostname: trino
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -17,8 +18,10 @@ services:
       - ./trino-config/password-authenticator.properties:/etc/trino/password-authenticator.properties:ro
       - ./trino-config/password.db:/etc/trino/password.db:ro
     depends_on:
-      - postgres
-      - clickhouse
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/v1/info || exit 1"]
       interval: 10s
@@ -30,6 +33,7 @@ services:
   clickhouse:
     image: clickhouse/clickhouse-server:25.12-alpine
     container_name: highload-lab4-clickhouse-server
+    hostname: clickhouse
     restart: unless-stopped
     ports:
       - "8123:8123"
@@ -39,11 +43,13 @@ services:
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml:ro
       - ./disable_logs.xml:/etc/clickhouse-server/config.d/z_disable_logs.xml:ro
       - ./config.xml:/etc/clickhouse-server/config.d/config.xml:ro
-      - ./clickhouse-init.sql:/docker-entrypoint-initdb.d/clickhouse-init.sql
+      - ./clickhouse-init.sql:/init/clickhouse-init.sql:ro
+      - ./clickhouse-entrypoint.sh:/clickhouse-entrypoint.sh:ro
       - ./исходные данные:/mock_data
     environment:
       CLICKHOUSE_DB: lab4
       ADMIN_PASSWORD: xekg_eh9xyJDJFHJKSDHKqy_xa?rd!en66
+    entrypoint: ["/bin/sh", "/clickhouse-entrypoint.sh"]
     healthcheck:
       test: [ "CMD-SHELL", "clickhouse-client --query 'SELECT 1'" ]
       interval: 10s
@@ -55,6 +61,7 @@ services:
 
   postgres:
     container_name: highload-lab4-postgres
+    hostname: postgres
     image: postgres:18-alpine
     restart: unless-stopped
     environment:
