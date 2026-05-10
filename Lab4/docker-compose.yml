@@ -1,0 +1,88 @@
+﻿include:
+  - golang-trino/docker-compose.yml
+  - R-trino/docker-compose.yml
+
+name: highload-lab4
+
+services:
+  trino:
+    image: trinodb/trino:480
+    container_name: highload-lab4-trino
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./trino-catalog:/etc/trino/catalog:ro
+      - ./trino-config/config.properties:/etc/trino/config.properties:ro
+      - ./trino-config/password-authenticator.properties:/etc/trino/password-authenticator.properties:ro
+      - ./trino-config/password.db:/etc/trino/password.db:ro
+    depends_on:
+      - postgres
+      - clickhouse
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/v1/info || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - highload-lab4-network
+  
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.12-alpine
+    container_name: highload-lab4-clickhouse-server
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./users.xml:/etc/clickhouse-server/users.d/users.xml:ro
+      - ./disable_logs.xml:/etc/clickhouse-server/config.d/z_disable_logs.xml:ro
+      - ./config.xml:/etc/clickhouse-server/config.d/config.xml:ro
+      - ./clickhouse-init.sql:/docker-entrypoint-initdb.d/clickhouse-init.sql
+      - ./исходные данные:/mock_data
+    environment:
+      CLICKHOUSE_DB: lab4
+      ADMIN_PASSWORD: xekg_eh9xyJDJFHJKSDHKqy_xa?rd!en66
+    healthcheck:
+      test: [ "CMD-SHELL", "clickhouse-client --query 'SELECT 1'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - highload-lab4-network
+
+  postgres:
+    container_name: highload-lab4-postgres
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: "/var/lib/postgresql/18/docker"
+      PGUSER: postgres
+      PGDATABASE: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
+      - ./исходные данные:/mock_data:ro
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
+    networks:
+      - highload-lab4-network
+
+volumes:
+  postgres-data:
+  clickhouse-data:
+
+networks:
+  highload-lab4-network:
+    driver: bridge

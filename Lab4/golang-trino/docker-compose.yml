@@ -1,0 +1,22 @@
+﻿name: highload-lab4-golang-trino
+
+services:
+  golang-trino:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: highload-lab4-golang-trino
+    restart: no
+    environment:
+      TRINO_SCHEME: http
+      TRINO_HOST: trino
+      TRINO_PORT: "8080"
+      TRINO_USER: trino
+      TRINO_PASSWORD: trino
+      TRINO_CATALOG: postgres
+      TRINO_SCHEMA: public
+    depends_on:
+      trino:
+        condition: service_healthy
+    networks:
+      - highload-lab4-network

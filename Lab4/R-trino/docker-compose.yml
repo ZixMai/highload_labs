@@ -1,0 +1,22 @@
+name: highload-lab4-r-trino
+
+services:
+  r-trino:
+    platform: linux/arm64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: highload-lab4-r-trino
+    restart: no
+    environment:
+      TRINO_HOST: trino
+      TRINO_PORT: "8080"
+      TRINO_USER: trino
+      TRINO_PASSWORD: trino
+      TRINO_CLICKHOUSE_CATALOG: clickhouse
+      REPORT_SCHEMA: lab4_reports
+    depends_on:
+      golang-trino:
+        condition: service_completed_successfully
+    networks:
+      - highload-lab4-network
