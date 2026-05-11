@@ -13,6 +13,7 @@ RUN mkdir -p \
     /opt/nifi/nifi-current/database_repository \
     /opt/nifi/nifi-current/logs \
     /opt/nifi/nifi-current/extensions \
+ && sed -i 's/\r$//' /opt/nifi/scripts/nifi-start-with-local-flow.sh \
  && chmod 755 /opt/nifi/scripts/nifi-start-with-local-flow.sh \
  && chown -R nifi:nifi /opt/nifi/nifi-current /opt/nifi/scripts/nifi-start-with-local-flow.sh
 

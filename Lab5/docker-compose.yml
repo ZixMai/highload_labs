@@ -63,7 +63,7 @@ services:
     hostname: nifi
     networks:
       - highload-lab5-network
-    entrypoint: [ "/opt/nifi/scripts/nifi-start-with-local-flow.sh" ]
+    entrypoint: [ "/bin/sh", "/opt/nifi/scripts/nifi-start-with-local-flow.sh" ]
     environment:
       NIFI_WEB_HTTPS_HOST: 0.0.0.0
       NIFI_WEB_PROXY_HOST: localhost:8443
