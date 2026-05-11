@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # 03_metabase_restore.sh
 set -e
 
