@@ -14,7 +14,7 @@ services:
       PGUSER: postgres
       PGDATABASE: postgres
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres && psql -U postgres -d metabase -c 'SELECT 1' > /dev/null 2>&1" ]
       interval: 5s
       timeout: 10s
       retries: 10
@@ -103,6 +103,9 @@ services:
       MB_DB_USER: postgres
       MB_DB_PASS: postgres
       MB_DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - highload-lab5-network
     healthcheck:

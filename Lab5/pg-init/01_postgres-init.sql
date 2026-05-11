@@ -54,5 +54,3 @@ CREATE TABLE mock_data
     supplier_country     VARCHAR(255),
     source_file          VARCHAR(255)
 );
-
-CREATE DATABASE metabase;

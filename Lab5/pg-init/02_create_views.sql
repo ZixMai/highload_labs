@@ -1,6 +1,7 @@
 -- Топ-10 самых продаваемых продуктов
 CREATE VIEW report_top10_products_by_quantity AS
 SELECT
+    product_name || ' (' || product_category || ')' AS product_label,
     product_name,
     product_category,
     SUM(sale_quantity)    AS total_quantity_sold,
